@@ -77,6 +77,13 @@ def transcribe_audio_with_vad(audio_path: str, audio_id: str):
     )
     model.to(DEVICE)
 
+    model.generation_config.language = "en"
+    model.generation_config.task = "transcribe"
+    model.generation_config.forced_decoder_ids = None
+    # Explicitly set no_timestamps_token_id if missing or ensuring it's there
+    # 50364 is the standard for multilingual Whisper, observed in debug
+    model.generation_config.no_timestamps_token_id = 50364 
+
     # Load the processor for audio preprocessing
     processor = WhisperProcessor.from_pretrained(MODEL_ID)
 
@@ -88,7 +95,8 @@ def transcribe_audio_with_vad(audio_path: str, audio_id: str):
         device=DEVICE,
         generate_kwargs={
             "task": "transcribe",
-            "language": "en"
+            "language": "en",
+            "generation_config": model.generation_config
         }
     )
 
